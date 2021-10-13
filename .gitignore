@@ -128,3 +128,5 @@ cython_debug/
 #.idea/
 .idea/
 
+#config
+config.py
