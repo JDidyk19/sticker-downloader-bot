@@ -1,6 +1,7 @@
 import telebot
-from telebot.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
+from telebot.types import Message, CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
 from config import TOKEN
+import re
 
 bot = telebot.TeleBot(TOKEN, parse_mode=None)
 
@@ -30,6 +31,24 @@ def message(message: Message) -> None:
                          f'file id: {sticker_info.file_id}\n' +
                          f'emoji: {sticker_info.emoji}\n' +
                          f'set name: {sticker_info.set_name}', reply_markup=inline_markup)
+
+
+@bot.callback_query_handler(func=lambda call: True)
+def callback(call: CallbackQuery) -> None:
+    sticker_info = sticker_data(call.message.text)
+    if call.data == 'sticker':
+        pass
+    elif call.data == 'pack':
+        pass
+
+
+def sticker_data(text: str) -> dict:
+    data = dict()
+    file_id = re.search(r'file id: ([a-zA-Z0-9_-]+)', text).group(1)
+    set_name = re.search(r'set name: ([a-zA-Z0-9_-]+)', text).group(1)
+    data['file_id'] = file_id
+    data['set_name'] = set_name
+    return data
 
 
 if __name__ == '__main__':
