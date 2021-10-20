@@ -2,6 +2,7 @@ import telebot
 from telebot.types import Message, CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
 from config import TOKEN
 import re
+import requests
 
 bot = telebot.TeleBot(TOKEN, parse_mode=None)
 
@@ -45,6 +46,7 @@ def callback(call: CallbackQuery) -> None:
 def sticker(sticker_info: dict) -> None:
     file_id = sticker_info['file_id']
     file_path = bot.get_file(file_id).file_path
+    image = download_sticker(file_path)
 
 
 def sticker_pack(sticker_info: dict) -> None:
@@ -53,6 +55,16 @@ def sticker_pack(sticker_info: dict) -> None:
     for sticker in sticker_list[:5]:
         file_id = sticker.file_id
         file_path = bot.get_file(file_id).file_path
+        image = download_sticker(file_path)
+
+
+def download_sticker(file_path: str) -> bytes:
+    '''
+        Download sticker from Telegram server.
+    '''
+    URL = f'http://api.telegram.org/file/bot{TOKEN}/{file_path}'
+    response = requests.get(URL).content
+    return response
 
 
 def get_sticker_data(text: str) -> dict:
