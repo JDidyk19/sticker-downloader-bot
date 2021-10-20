@@ -61,6 +61,8 @@ def sticker_pack(sticker_info: dict) -> None:
 def download_sticker(file_path: str) -> bytes:
     '''
         Download sticker from Telegram server.
+        :param file_path: Path where the sticker is located.
+        :return: Bytes of image
     '''
     URL = f'http://api.telegram.org/file/bot{TOKEN}/{file_path}'
     response = requests.get(URL).content
@@ -68,6 +70,11 @@ def download_sticker(file_path: str) -> bytes:
 
 
 def get_sticker_data(text: str) -> dict:
+    '''
+        Get file_id, set_name from message
+        :param text: Text message.
+        :return: A dictionary with data sticker.
+    '''
     data = dict()
     file_id = re.search(r'file id: ([a-zA-Z0-9_-]+)', text).group(1)
     set_name = re.search(r'set name: ([a-zA-Z0-9_-]+)', text).group(1)
