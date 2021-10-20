@@ -39,12 +39,20 @@ def callback(call: CallbackQuery) -> None:
     if call.data == 'sticker':
         sticker(sticker_info)
     elif call.data == 'pack':
-        pass
+        sticker_pack(sticker_info)
 
 
 def sticker(sticker_info: dict) -> None:
     file_id = sticker_info['file_id']
     file_path = bot.get_file(file_id).file_path
+
+
+def sticker_pack(sticker_info: dict) -> None:
+    set_name = sticker_info['set_name']
+    sticker_list = bot.get_sticker_set(set_name).stickers
+    for sticker in sticker_list[:5]:
+        file_id = sticker.file_id
+        file_path = bot.get_file(file_id).file_path
 
 
 def get_sticker_data(text: str) -> dict:
