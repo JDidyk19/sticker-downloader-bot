@@ -35,14 +35,19 @@ def message(message: Message) -> None:
 
 @bot.callback_query_handler(func=lambda call: True)
 def callback(call: CallbackQuery) -> None:
-    sticker_info = sticker_data(call.message.text)
+    sticker_info = get_sticker_data(call.message.text)
     if call.data == 'sticker':
-        pass
+        sticker(sticker_info)
     elif call.data == 'pack':
         pass
 
 
-def sticker_data(text: str) -> dict:
+def sticker(sticker_info: dict) -> None:
+    file_id = sticker_info['file_id']
+    file_path = bot.get_file(file_id).file_path
+
+
+def get_sticker_data(text: str) -> dict:
     data = dict()
     file_id = re.search(r'file id: ([a-zA-Z0-9_-]+)', text).group(1)
     set_name = re.search(r'set name: ([a-zA-Z0-9_-]+)', text).group(1)
