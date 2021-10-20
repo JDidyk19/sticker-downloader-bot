@@ -9,6 +9,11 @@ bot = telebot.TeleBot(TOKEN, parse_mode=None)
 
 @bot.message_handler(commands=['start'])
 def start(message: Message) -> None:
+    '''
+        Sends to user welcome message.
+
+        :param message: Object Message.
+    '''
     bot.send_message(message.chat.id,
                      f'Hi! I\'m bot - @{bot.get_me().username}\n' +
                      f'Have a good day!!\n' +
@@ -18,6 +23,11 @@ def start(message: Message) -> None:
 
 @bot.message_handler(content_types=['text', 'sticker'])
 def message(message: Message) -> None:
+    '''
+        Sends user to sticker information and a inline keyboard.
+
+        :param message: Object Message from user.
+    '''
     if message.text:
         bot.send_message(message.chat.id, 'You need to send me a sticker‼')
 
@@ -36,6 +46,11 @@ def message(message: Message) -> None:
 
 @bot.callback_query_handler(func=lambda call: True)
 def callback(call: CallbackQuery) -> None:
+    '''
+        Handles keyboard buttons.
+
+        :param call: CallbackQuery object.
+    '''
     sticker_info = get_sticker_data(call.message.text)
     if call.data == 'sticker':
         sticker(sticker_info)
@@ -63,7 +78,7 @@ def download_sticker(file_path: str) -> bytes:
         Download sticker from Telegram server.
 
         :param file_path: Path where the sticker is located.
-        :return: Bytes of image
+        :return: Bytes of image.
     '''
     URL = f'http://api.telegram.org/file/bot{TOKEN}/{file_path}'
     response = requests.get(URL).content
@@ -72,7 +87,7 @@ def download_sticker(file_path: str) -> bytes:
 
 def get_sticker_data(text: str) -> dict:
     '''
-        Get file_id, set_name from message
+        Get file_id, set_name from message.
 
         :param text: Text message.
         :return: A dictionary with data sticker.
