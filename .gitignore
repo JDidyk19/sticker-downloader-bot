@@ -127,3 +127,6 @@ cython_debug/
 
 #.idea/
 .idea/
+
+# stickers folder
+stickers/
