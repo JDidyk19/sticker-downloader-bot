@@ -1,6 +1,7 @@
 import re
 import requests
 import os
+import shutil
 
 import telebot
 from telebot.types import Message, CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
@@ -11,10 +12,9 @@ bot = telebot.TeleBot(TOKEN, parse_mode=None)
 
 @bot.message_handler(commands=['start'])
 def start(message: Message) -> None:
-    """
-        Sends to user welcome message.
+    """Sends to user welcome message.
 
-        :param message: Object Message.
+    :param message: Object Message.
     """
     bot.send_message(message.chat.id,
                      f'Hi! I\'m bot - @{bot.get_me().username}\n' +
@@ -25,10 +25,9 @@ def start(message: Message) -> None:
 
 @bot.message_handler(content_types=['text', 'sticker'])
 def message(message: Message) -> None:
-    """
-        Sends to user sticker information and a inline keyboard.
+    """Sends to user sticker information and a inline keyboard.
 
-        :param message: Object Message from user.
+    :param message: Object Message from user.
     """
     if message.text:
         bot.send_message(message.chat.id, 'You need to send me a sticker‼')
@@ -48,13 +47,12 @@ def message(message: Message) -> None:
 
 @bot.callback_query_handler(func=lambda call: True)
 def callback(call: CallbackQuery) -> None:
+    """Handles keyboard buttons.
+
+    :param call: CallbackQuery object.
+    """
     chat_id = str(call.message.chat.id)
     message_text = call.message.text
-    """
-        Handles keyboard buttons.
-
-        :param call: CallbackQuery object.
-    """
     sticker_info = get_sticker_data(message_text)
     if call.data == 'sticker':
         sticker(sticker_info, chat_id)
@@ -72,6 +70,7 @@ def sticker(sticker_info: dict, chat_id: str) -> None:
 
     image = download_sticker(file_path)
     save_image(image, file_name, path_to_folder)
+    zipping_folder(path_to_folder, chat_id)
 
 
 def sticker_pack(sticker_info: dict, chat_id: str) -> None:
@@ -87,11 +86,10 @@ def sticker_pack(sticker_info: dict, chat_id: str) -> None:
 
 
 def download_sticker(file_path: str) -> bytes:
-    """
-        Download sticker from Telegram server.
+    """Download sticker from Telegram server.
 
-        :param file_path: Path where the sticker is located.
-        :return: Bytes of image.
+    :param file_path: Path where the sticker is located.
+    :return: Bytes of image.
     """
     URL = f'https://api.telegram.org/file/bot{TOKEN}/{file_path}'
     response = requests.get(URL).content
@@ -99,11 +97,10 @@ def download_sticker(file_path: str) -> bytes:
 
 
 def create_folder(chat_id: str) -> None:
-    """
-        Create folder for stickers.
+    """Create folder for stickers.
 
-        :param chat_id: user id.
-        :return: Path to folder.
+    :param chat_id: user id.
+    :return: Path to folder.
     """
     path = os.path.join(STICKERS_DIR, chat_id)
     if not os.path.exists(path):
@@ -111,24 +108,28 @@ def create_folder(chat_id: str) -> None:
     return path
 
 
-def save_image(image: bytes, image_name: str, path: str) -> None:
-    """
-        Save image to a user's folder.
+def zipping_folder(path: str, chat_id: str) -> None:
+    path = os.path.join(STICKERS_DIR, chat_id)
+    shutil.make_archive(chat_id, 'tar', root_dir=path)
 
-        :param image:
-        :param image_name: A image name.
-        :param path: A location to save the image.
+
+
+def save_image(image: bytes, image_name: str, path: str) -> None:
+    """Save image to a user's folder.
+
+    :param image:
+    :param image_name: A image name.
+    :param path: A location to save the image.
     """
     with open(f'{path}/{image_name}', 'wb') as img:
         img.write(image)
 
 
 def get_sticker_data(text: str) -> dict:
-    """
-        Get file_id, set_name from message.
+    """Get file_id, set_name from message.
 
-        :param text: Text message.
-        :return: A dictionary with data sticker.
+    :param text: Text message.
+    :return: A dictionary with data sticker.
     """
     data = dict()
     file_id = re.search(r'file id: ([a-zA-Z0-9_-]+)', text).group(1)
