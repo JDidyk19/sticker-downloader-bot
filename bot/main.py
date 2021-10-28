@@ -106,7 +106,12 @@ def download_sticker(file_path: str) -> bytes:
     return response
 
 
-def download_stickers(tasks: List[Tuple]) -> List:
+def download_stickers(tasks: List[Tuple]) -> List[Tuple]:
+    """Asynchronous download of stickers from Telegram server.
+
+    :param tasks: List of tuples with image name and path.
+    :return: List of tuples image name and response
+    """
     file_names = [task[1] for task in tasks]
     gen = (grequests.get(URL.format(TOKEN=TOKEN, file_path=task[0])) for task in tasks)
     response = grequests.map(gen)
