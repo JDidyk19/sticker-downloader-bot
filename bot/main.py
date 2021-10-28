@@ -14,7 +14,7 @@ bot = telebot.TeleBot(TOKEN, parse_mode=None)
 
 @bot.message_handler(commands=['start'])
 def start(message: Message) -> None:
-    """Sends to user welcome message.
+    """Send to user welcome message.
 
     :param message: Object Message.
     """
@@ -27,9 +27,9 @@ def start(message: Message) -> None:
 
 @bot.message_handler(content_types=['text', 'sticker'])
 def message(message: Message) -> None:
-    """Sends to user sticker information and a inline keyboard.
+    """Send to user warning message or sticker information and a inline keyboard.
 
-    :param message: Object Message from user.
+    :param message: Object Message.
     """
     if message.text:
         bot.send_message(message.chat.id, 'You need to send me a sticker‼')
@@ -49,7 +49,7 @@ def message(message: Message) -> None:
 
 @bot.callback_query_handler(func=lambda call: True)
 def callback(call: CallbackQuery) -> None:
-    """Handles keyboard buttons.
+    """Handle keyboard buttons.
 
     :param call: CallbackQuery object.
     """
