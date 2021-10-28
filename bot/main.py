@@ -1,11 +1,13 @@
 import re
-import requests
 import os
 import shutil
+from typing import List, Tuple
 
+import grequests
+import requests
 import telebot
 from telebot.types import Message, CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
-from config import TOKEN, BASE_DIR, STICKERS_DIR
+from config import TOKEN, BASE_DIR, STICKERS_DIR, URL
 
 bot = telebot.TeleBot(TOKEN, parse_mode=None)
 
@@ -52,8 +54,7 @@ def callback(call: CallbackQuery) -> None:
     :param call: CallbackQuery object.
     """
     chat_id = str(call.message.chat.id)
-    message_text = call.message.text
-    sticker_info = get_sticker_data(message_text)
+    sticker_info = get_sticker_data(call.message.text)
     if call.data == 'sticker':
         sticker(sticker_info, chat_id)
     elif call.data == 'pack':
@@ -62,27 +63,37 @@ def callback(call: CallbackQuery) -> None:
 
 def sticker(sticker_info: dict, chat_id: str) -> None:
     path_to_folder = create_folder(chat_id)
-
     file_id = sticker_info['file_id']
-
     file_path = bot.get_file(file_id).file_path
     file_name = file_path.split('/')[1]
-
     image = download_sticker(file_path)
     save_image(image, file_name, path_to_folder)
-    zipping_folder(path_to_folder, chat_id)
+    # Folder archiving
+    shutil.make_archive(base_name=path_to_folder, format='tar', root_dir=path_to_folder)
+    with open(path_to_folder + '.tar', 'rb') as archive:
+        bot.send_document(chat_id, archive)
+    # Delete tar file and folder
+    delete_folder_file(path_to_folder)
 
 
 def sticker_pack(sticker_info: dict, chat_id: str) -> None:
     path_to_folder = create_folder(chat_id)
     set_name = sticker_info['set_name']
     sticker_list = bot.get_sticker_set(set_name).stickers
+    tasks = []
     for sticker in sticker_list:
-        file_id = sticker.file_id
-        file_path = bot.get_file(file_id).file_path
+        file_path = bot.get_file(sticker.file_id).file_path
         file_name = file_path.split('/')[1]
-        image = download_sticker(file_path)
-        save_image(image, file_name, path_to_folder)
+        tasks.append((file_path, file_name))
+    images = download_stickers(tasks)
+    for name, image in images:
+        save_image(image.content, name, path_to_folder)
+    # Folder archiving
+    shutil.make_archive(base_name=path_to_folder, format='tar', root_dir=path_to_folder)
+    with open(path_to_folder + '.tar', 'rb') as archive:
+        bot.send_document(chat_id, archive)
+    # Delete tar file and folder
+    delete_folder_file(path_to_folder)
 
 
 def download_sticker(file_path: str) -> bytes:
@@ -91,12 +102,18 @@ def download_sticker(file_path: str) -> bytes:
     :param file_path: Path where the sticker is located.
     :return: Bytes of image.
     """
-    URL = f'https://api.telegram.org/file/bot{TOKEN}/{file_path}'
-    response = requests.get(URL).content
+    response = requests.get(URL.format(TOKEN=TOKEN, file_path=file_path)).content
     return response
 
 
-def create_folder(chat_id: str) -> None:
+def download_stickers(tasks: List[Tuple]) -> List:
+    file_names = [task[1] for task in tasks]
+    gen = (grequests.get(URL.format(TOKEN=TOKEN, file_path=task[0])) for task in tasks)
+    response = grequests.map(gen)
+    return list(zip(file_names, response))
+
+
+def create_folder(chat_id: str) -> str:
     """Create folder for stickers.
 
     :param chat_id: user id.
@@ -108,10 +125,15 @@ def create_folder(chat_id: str) -> None:
     return path
 
 
-def zipping_folder(path: str, chat_id: str) -> None:
-    path = os.path.join(STICKERS_DIR, chat_id)
-    shutil.make_archive(chat_id, 'tar', root_dir=path)
+def delete_folder_file(path: str) -> None:
+    """Deleting archive file and folder with stickers
 
+    :param path: Path to folder
+    """
+    # Delete archive file
+    os.remove(path + '.tar')
+    # # Delete folder
+    shutil.rmtree(path)
 
 
 def save_image(image: bytes, image_name: str, path: str) -> None:
