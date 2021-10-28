@@ -62,6 +62,13 @@ def callback(call: CallbackQuery) -> None:
 
 
 def sticker(sticker_info: dict, chat_id: str) -> None:
+    """Handle the "sticker" button.
+    Create a folder, download sticker, create archive file of folder.
+    Send to user archive file and delete archive and folder.
+
+    :param sticker_info: A dictionary with data sticker.
+    :param chat_id: A user's id.
+    """
     path_to_folder = create_folder(chat_id)
     file_id = sticker_info['file_id']
     file_path = bot.get_file(file_id).file_path
@@ -77,6 +84,13 @@ def sticker(sticker_info: dict, chat_id: str) -> None:
 
 
 def sticker_pack(sticker_info: dict, chat_id: str) -> None:
+    """Handle the "pack" button.
+    Create a folder, asynchronous download of stickers, create archive file of folder.
+    Send to user archive file and delete archive and folder.
+
+    :param sticker_info: A dictionary with data sticker.
+    :param chat_id: A user's id.
+    """
     path_to_folder = create_folder(chat_id)
     set_name = sticker_info['set_name']
     sticker_list = bot.get_sticker_set(set_name).stickers
@@ -97,7 +111,7 @@ def sticker_pack(sticker_info: dict, chat_id: str) -> None:
 
 
 def download_sticker(file_path: str) -> bytes:
-    """Download sticker from Telegram server.
+    """Download one sticker from Telegram server.
 
     :param file_path: Path where the sticker is located.
     :return: Bytes of image.
@@ -121,7 +135,7 @@ def download_stickers(tasks: List[Tuple]) -> List[Tuple]:
 def create_folder(chat_id: str) -> str:
     """Create folder for stickers.
 
-    :param chat_id: user id.
+    :param chat_id: A user's id.
     :return: Path to folder.
     """
     path = os.path.join(STICKERS_DIR, chat_id)
@@ -131,20 +145,20 @@ def create_folder(chat_id: str) -> str:
 
 
 def delete_folder_file(path: str) -> None:
-    """Deleting archive file and folder with stickers
+    """Deleting archive file and folder with stickers.
 
-    :param path: Path to folder
+    :param path: Path to folder.
     """
     # Delete archive file
     os.remove(path + '.tar')
-    # # Delete folder
+    # Delete folder
     shutil.rmtree(path)
 
 
 def save_image(image: bytes, image_name: str, path: str) -> None:
     """Save image to a user's folder.
 
-    :param image:
+    :param image: Bytes of image.
     :param image_name: A image name.
     :param path: A location to save the image.
     """
