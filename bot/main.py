@@ -19,10 +19,10 @@ def start(message: Message) -> None:
     :param message: Object Message.
     """
     bot.send_message(message.chat.id,
-                     f'Hi! I\'m bot - @{bot.get_me().username}\n' +
+                     f'Hi! I\'m bot - @{bot.get_me().username}.\n' +
                      f'Have a good day!!\n' +
                      f'I\'ll help you download stickers!\n' +
-                     f'Send me a sticker and I\'ll download it for you')
+                     f'Send me a sticker and I\'ll download it for you.')
 
 
 @bot.message_handler(content_types=['text', 'sticker'])
@@ -32,7 +32,7 @@ def message(message: Message) -> None:
     :param message: Object Message.
     """
     if message.text:
-        bot.send_message(message.chat.id, 'You need to send me a sticker‼')
+        bot.send_message(message.chat.id, 'You need to send me a sticker.‼')
 
     elif message.sticker:
         sticker_info = message.sticker
@@ -55,6 +55,7 @@ def callback(call: CallbackQuery) -> None:
     """
     chat_id = str(call.message.chat.id)
     sticker_info = get_sticker_data(call.message.text)
+    bot.edit_message_reply_markup(chat_id, call.message.id, reply_markup=None)
     if call.data == 'sticker':
         sticker(sticker_info, chat_id)
     elif call.data == 'pack':
@@ -91,6 +92,7 @@ def sticker_pack(sticker_info: dict, chat_id: str) -> None:
     :param sticker_info: A dictionary with data sticker.
     :param chat_id: A user's id.
     """
+    bot.send_message(chat_id, 'Please wait a moment😛')
     path_to_folder = create_folder(chat_id)
     set_name = sticker_info['set_name']
     sticker_list = bot.get_sticker_set(set_name).stickers
