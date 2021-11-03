@@ -7,7 +7,7 @@ import grequests
 import requests
 import telebot
 from telebot.types import Message, CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
-from bot.config import TOKEN, BASE_DIR, STICKERS_DIR, URL
+from config import TOKEN, BASE_DIR, STICKERS_DIR, URL
 
 bot = telebot.TeleBot(TOKEN, parse_mode=None)
 
