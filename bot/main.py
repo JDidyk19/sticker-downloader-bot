@@ -4,7 +4,6 @@ import shutil
 from typing import List, Tuple
 
 import grequests
-import requests
 import telebot
 from telebot.types import Message, CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
 from config import TOKEN, BASE_DIR, STICKERS_DIR, URL
@@ -74,8 +73,9 @@ def sticker(sticker_info: dict, chat_id: str) -> None:
     file_id = sticker_info['file_id']
     file_path = bot.get_file(file_id).file_path
     file_name = file_path.split('/')[1]
-    image = download_sticker(file_path)
-    save_image(image, file_name, path_to_folder)
+    images = download_stickers([(file_path, file_name)])
+    for name, image in images:
+        save_image(image.content, name, path_to_folder)
     # Folder archiving
     shutil.make_archive(base_name=path_to_folder, format='tar', root_dir=path_to_folder)
     with open(path_to_folder + '.tar', 'rb') as archive:
@@ -110,16 +110,6 @@ def sticker_pack(sticker_info: dict, chat_id: str) -> None:
         bot.send_document(chat_id, archive)
     # Delete tar file and folder
     delete_folder_file(path_to_folder)
-
-
-def download_sticker(file_path: str) -> bytes:
-    """Download one sticker from Telegram server.
-
-    :param file_path: Path where the sticker is located.
-    :return: Bytes of image.
-    """
-    response = requests.get(URL.format(TOKEN=TOKEN, file_path=file_path)).content
-    return response
 
 
 def download_stickers(tasks: List[Tuple]) -> List[Tuple]:
