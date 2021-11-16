@@ -15,8 +15,9 @@ To get a local copy up and running follow these simple example steps.
 
 ### Installation
 - Clone the repo
-`git@github.com:JDidyk19/sticker_downloader_bot.git`
+`git@github.com:JDidyk19/sticker-downloader-bot.git`
 - Set your token to the environment variables 
-  + On Linux terminal `export TOKEN='your token'`
-- `cd sticker_downloader_bot/bot`
+  + On Linux/MAC OS terminal `export TOKEN='your token'`
+  + On Windows 10 Command LIne `set TOKEN=your token`
+- `cd sticker-downloader-bot/bot`
 - Start app `python3 main.py`
