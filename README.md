@@ -21,3 +21,22 @@ To get a local copy up and running follow these simple example steps.
   + On Windows 10 Command LIne `set TOKEN=your token`
 - `cd sticker-downloader-bot/bot`
 - Start app `python3 main.py`
+
+Hosting telegram bot on [Heroku](https://www.heroku.com/) for free
+===
+Easy way to host your python telegram bot on Heroku.
+### Deploying via [Heroku Dashboard](https://dashboard.heroku.com/apps)
+- If you don't have an account, you need to create a Heroku account [here](https://signup.heroku.com/login).
+- Go to [Dashboard](https://dashboard.heroku.com/apps), Press New and choose Create new app.
+- Fill in an **App Name** and choose **Runtime Region**.
+- Connect your **GitHub repo** at **Deploy page**.
+- Setup Automatics deploys (Optionaly).
+- Deploy a GitHub branch.
+- Then go to a **Settings page**, click **Reveal Config Vars** and then add your `TOKEN`:
+- Finally, go to the **Resources page.**
+  + Install **Heroku Redis add-on (Optionaly)**.
+  + Press on a small pen button, move slider and then click **Confirm**, that will start bot dyno.
+  + Simply move slider back if you need to stop bot dyno, remember to click Confirm.
+  + If for some reason it’s not working, check the logs here
+
+  ![](https://camo.githubusercontent.com/e561ede3fcf4c9f88115a4bea7fc2e3d517e24f8ae4215fc9accac3113f52eb8/687474703a2f2f692e696d6775722e636f6d2f72494855367a462e706e67)
