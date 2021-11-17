@@ -1,49 +1,54 @@
-import re
 import os
+import re
 import shutil
 from typing import List, Tuple
 
 import grequests
 import telebot
-from telebot.types import Message, CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
-from config import TOKEN, BASE_DIR, STICKERS_DIR, URL
+from config import STICKERS_DIR, TOKEN, URL
+from telebot.types import CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup, Message
 
 bot = telebot.TeleBot(TOKEN, parse_mode=None)
 
 
-@bot.message_handler(commands=['start'])
+@bot.message_handler(commands=["start"])
 def start(message: Message) -> None:
     """Send to user welcome message.
 
     :param message: Object Message.
     """
-    bot.send_message(message.chat.id,
-                     f'Hi! I\'m bot - @{bot.get_me().username}.\n' +
-                     f'Have a good day!!\n' +
-                     f'I\'ll help you download stickers!\n' +
-                     f'Send me a sticker and I\'ll download it for you.')
+    bot.send_message(
+        message.chat.id,
+        f"Hi! I'm bot - @{bot.get_me().username}.\n"
+        + "Have a good day!!\n"
+        + "I'll help you download stickers!\n"
+        + "Send me a sticker and I'll download it for you.",
+    )
 
 
-@bot.message_handler(content_types=['text', 'sticker'])
+@bot.message_handler(content_types=["text", "sticker"])
 def message(message: Message) -> None:
     """Send to user warning message or sticker information and a inline keyboard.
 
     :param message: Object Message.
     """
     if message.text:
-        bot.send_message(message.chat.id, 'You need to send me a sticker.‼')
+        bot.send_message(message.chat.id, "You need to send me a sticker.‼")
 
     elif message.sticker:
         sticker_info = message.sticker
         inline_markup = InlineKeyboardMarkup(row_width=2).add(
-            InlineKeyboardButton('Download the sticker', callback_data='sticker'),
-            InlineKeyboardButton('Download sticker pack', callback_data='pack')
+            InlineKeyboardButton("Download the sticker", callback_data="sticker"),
+            InlineKeyboardButton("Download sticker pack", callback_data="pack"),
         )
-        bot.send_message(message.chat.id,
-                         f'Information about the sticker:\n' +
-                         f'file id: {sticker_info.file_id}\n' +
-                         f'emoji: {sticker_info.emoji}\n' +
-                         f'set name: {sticker_info.set_name}', reply_markup=inline_markup)
+        bot.send_message(
+            message.chat.id,
+            "Information about the sticker:\n"
+            + f"file id: {sticker_info.file_id}\n"
+            + f"emoji: {sticker_info.emoji}\n"
+            + f"set name: {sticker_info.set_name}",
+            reply_markup=inline_markup,
+        )
 
 
 @bot.callback_query_handler(func=lambda call: True)
@@ -55,9 +60,9 @@ def callback(call: CallbackQuery) -> None:
     chat_id = str(call.message.chat.id)
     sticker_info = get_sticker_data(call.message.text)
     bot.edit_message_reply_markup(chat_id, call.message.id, reply_markup=None)
-    if call.data == 'sticker':
+    if call.data == "sticker":
         sticker(sticker_info, chat_id)
-    elif call.data == 'pack':
+    elif call.data == "pack":
         sticker_pack(sticker_info, chat_id)
 
 
@@ -70,15 +75,15 @@ def sticker(sticker_info: dict, chat_id: str) -> None:
     :param chat_id: A user's id.
     """
     path_to_folder = create_folder(chat_id)
-    file_id = sticker_info['file_id']
+    file_id = sticker_info["file_id"]
     file_path = bot.get_file(file_id).file_path
-    file_name = file_path.split('/')[1]
+    file_name = file_path.split("/")[1]
     images = download_stickers([(file_path, file_name)])
     for name, image in images:
         save_image(image.content, name, path_to_folder)
     # Folder archiving
-    shutil.make_archive(base_name=path_to_folder, format='tar', root_dir=path_to_folder)
-    with open(path_to_folder + '.tar', 'rb') as archive:
+    shutil.make_archive(base_name=path_to_folder, format="tar", root_dir=path_to_folder)
+    with open(path_to_folder + ".tar", "rb") as archive:
         bot.send_document(chat_id, archive)
     # Delete tar file and folder
     delete_folder_file(path_to_folder)
@@ -92,21 +97,21 @@ def sticker_pack(sticker_info: dict, chat_id: str) -> None:
     :param sticker_info: A dictionary with data sticker.
     :param chat_id: A user's id.
     """
-    bot.send_message(chat_id, 'Please wait a moment😛')
+    bot.send_message(chat_id, "Please wait a moment😛")
     path_to_folder = create_folder(chat_id)
-    set_name = sticker_info['set_name']
+    set_name = sticker_info["set_name"]
     sticker_list = bot.get_sticker_set(set_name).stickers
     tasks = []
     for sticker in sticker_list:
         file_path = bot.get_file(sticker.file_id).file_path
-        file_name = file_path.split('/')[1]
+        file_name = file_path.split("/")[1]
         tasks.append((file_path, file_name))
     images = download_stickers(tasks)
     for name, image in images:
         save_image(image.content, name, path_to_folder)
     # Folder archiving
-    shutil.make_archive(base_name=path_to_folder, format='tar', root_dir=path_to_folder)
-    with open(path_to_folder + '.tar', 'rb') as archive:
+    shutil.make_archive(base_name=path_to_folder, format="tar", root_dir=path_to_folder)
+    with open(path_to_folder + ".tar", "rb") as archive:
         bot.send_document(chat_id, archive)
     # Delete tar file and folder
     delete_folder_file(path_to_folder)
@@ -142,7 +147,7 @@ def delete_folder_file(path: str) -> None:
     :param path: Path to folder.
     """
     # Delete archive file
-    os.remove(path + '.tar')
+    os.remove(path + ".tar")
     # Delete folder
     shutil.rmtree(path)
 
@@ -154,7 +159,7 @@ def save_image(image: bytes, image_name: str, path: str) -> None:
     :param image_name: A image name.
     :param path: A location to save the image.
     """
-    with open(f'{path}/{image_name}', 'wb') as img:
+    with open(f"{path}/{image_name}", "wb") as img:
         img.write(image)
 
 
@@ -165,12 +170,12 @@ def get_sticker_data(text: str) -> dict:
     :return: A dictionary with data sticker.
     """
     data = dict()
-    file_id = re.search(r'file id: ([a-zA-Z0-9_-]+)', text).group(1)
-    set_name = re.search(r'set name: ([a-zA-Z0-9_-]+)', text).group(1)
-    data['file_id'] = file_id
-    data['set_name'] = set_name
+    file_id = re.search(r"file id: ([a-zA-Z0-9_-]+)", text).group(1)
+    set_name = re.search(r"set name: ([a-zA-Z0-9_-]+)", text).group(1)
+    data["file_id"] = file_id
+    data["set_name"] = set_name
     return data
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     bot.polling(none_stop=True)
