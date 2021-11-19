@@ -20,6 +20,7 @@ To get a local copy up and running follow these simple example steps.
   + On Linux/MAC OS terminal `export TOKEN='your token'`
   + On Windows 10 Command LIne `set TOKEN=your token`
 - `cd sticker-downloader-bot/bot`
+- Execute the command `pip3 install -r requirements.txt`
 - Start app `python3 main.py`
 
 Hosting telegram bot on [Heroku](https://www.heroku.com/) for free
