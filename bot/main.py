@@ -8,8 +8,9 @@ import telebot
 from config import STICKERS_DIR, TOKEN, URL
 from telebot.types import CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup, Message
 
-bot = telebot.TeleBot(TOKEN, parse_mode=None)
 
+bot = telebot.TeleBot(TOKEN, parse_mode=None)
+sticker_data = dict()
 
 @bot.message_handler(commands=["start"])
 def start(message: Message) -> None:
@@ -32,11 +33,14 @@ def message(message: Message) -> None:
 
     :param message: Object Message.
     """
+    global sticker_data
     if message.text:
         bot.send_message(message.chat.id, "You need to send me a sticker.‼")
 
     elif message.sticker:
         sticker_info = message.sticker
+        sticker_data[message.chat.id] = {'file_id': sticker_info.file_id,
+                                          'set_name': sticker_info.set_name}
         inline_markup = InlineKeyboardMarkup(row_width=2).add(
             InlineKeyboardButton("Download the sticker", callback_data="sticker"),
             InlineKeyboardButton("Download sticker pack", callback_data="pack"),
@@ -44,7 +48,6 @@ def message(message: Message) -> None:
         bot.send_message(
             message.chat.id,
             "Information about the sticker:\n"
-            + f"file id: {sticker_info.file_id}\n"
             + f"emoji: {sticker_info.emoji}\n"
             + f"set name: {sticker_info.set_name}",
             reply_markup=inline_markup,
@@ -58,7 +61,7 @@ def callback(call: CallbackQuery) -> None:
     :param call: CallbackQuery object.
     """
     chat_id = str(call.message.chat.id)
-    sticker_info = get_sticker_data(call.message.text)
+    sticker_info = sticker_data.pop(int(chat_id))
     bot.edit_message_reply_markup(chat_id, call.message.id, reply_markup=None)
     if call.data == "sticker":
         sticker(sticker_info, chat_id)
@@ -161,20 +164,6 @@ def save_image(image: bytes, image_name: str, path: str) -> None:
     """
     with open(f"{path}/{image_name}", "wb") as img:
         img.write(image)
-
-
-def get_sticker_data(text: str) -> dict:
-    """Get file_id, set_name from message.
-
-    :param text: Text message.
-    :return: A dictionary with data sticker.
-    """
-    data = dict()
-    file_id = re.search(r"file id: ([a-zA-Z0-9_-]+)", text).group(1)
-    set_name = re.search(r"set name: ([a-zA-Z0-9_-]+)", text).group(1)
-    data["file_id"] = file_id
-    data["set_name"] = set_name
-    return data
 
 
 if __name__ == "__main__":
