@@ -19,9 +19,12 @@ To get a local copy up and running follow these simple example steps.
 - Set your token to the environment variables 
   + On Linux/MAC OS terminal `export TOKEN='your token'`
   + On Windows 10 Command LIne `set TOKEN=your token`
+- `cd sticker-downloader-bot`
+- Create a virtual environment `virtualenv venv`
+- Activate the virtual environment `source venv/bin/activate`
 - `cd sticker-downloader-bot/bot`
 - Execute the command `pip3 install -r requirements.txt`
-- Start app `python3 main.py`
+- Start app `bot/python3 main.py`
 
 Hosting telegram bot on [Heroku](https://www.heroku.com/) for free
 ===
