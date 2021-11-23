@@ -22,7 +22,6 @@ To get a local copy up and running follow these simple example steps.
 - `cd sticker-downloader-bot`
 - Create a virtual environment `virtualenv venv`
 - Activate the virtual environment `source venv/bin/activate`
-- `cd sticker-downloader-bot/bot`
 - Execute the command `pip3 install -r requirements.txt`
 - Start app `bot/python3 main.py`
 
